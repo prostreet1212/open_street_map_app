@@ -11,11 +11,35 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
 
   //final _mapController=MapController.withPosition(initPosition: GeoPoint(latitude: 1,longitude: 2));
-   MapController _mapController = MapController.withUserPosition(
+   MapController _mapController = MapController
+       .withUserPosition(
       trackUserLocation: UserTrackingOption(
-        enableTracking: false,
+        enableTracking: true,
         unFollowUser: true,
-      ));
+      ),
+   );
+
+   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _mapController.listenerMapSingleTapping.addListener(()async {
+        var position=_mapController.listenerMapSingleTapping.value;
+        if(position!=null){
+          await _mapController.addMarker(position,markerIcon: MarkerIcon(
+            icon: Icon(Icons.pin_drop,color:Colors.blue,size: 48 ,),
+          ));
+        }
+
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+  _mapController.dispose();
+    super.dispose();
+  }
 
 
   @override
@@ -24,13 +48,13 @@ class _MapScreenState extends State<MapScreen> {
     return  OSMFlutter(
       controller: _mapController,
       osmOption: OSMOption(
-        zoomOption: ZoomOption(
+        /*zoomOption: ZoomOption(
           initZoom: 12,
           minZoomLevel: 4,
           maxZoomLevel: 14,
           stepZoom: 1,
-        ),
-        userLocationMarker: UserLocationMaker(
+        ),*/
+       /* userLocationMarker: UserLocationMaker(
           personMarker: MarkerIcon(
             icon: Icon(
               Icons.personal_injury,
@@ -46,30 +70,27 @@ class _MapScreenState extends State<MapScreen> {
           ),
 
         ),
-        userTrackingOption: UserTrackingOption(
-          enableTracking: true,
-          unFollowUser: false,
-        ),
-        roadConfiguration: RoadOption(
-            roadColor: Colors.blueGrey
-        ),
-        /*markerOption: MarkerOption(
+        markerOption: MarkerOption(
           defaultMarker: MarkerIcon(
             icon: Icon(Icons.person_pin_circle,
               color: Colors.black,size: 48,),
           ),
-        ),*/
+        ),
+        roadConfiguration: RoadOption(
+          roadColor: Colors.blueGrey
+        )*/
       ),
-      onMapIsReady: (isReady)async{
-         _mapController.initPosition;
+      /*onMapIsReady: (isReady)async{
         if(isReady){
-          try {
-            await _mapController.currentLocation();
-          } catch (e) {
-            print('Ошибка при получении текущего местоположения: $e');
-          }
+          await Future.delayed(Duration(seconds: 1),()async{
+           await _mapController.currentLocation();
+           GeoPoint b=await _mapController.getCurrentPositionAdvancedPositionPicker();
+           print('LOCATION: ${b.latitude}:${b.longitude}');
+          });
+
+
         }
-      },
+      },*/
       mapIsLoading: Center(child: CircularProgressIndicator()),
 
     );
